@@ -1,0 +1,39 @@
+old_sound_rabbit_mq:
+  connections:
+    default:
+      url: '%env(RABBITMQ_URL)%'
+      lazy: true
+      keepalive: false
+
+  producers:
+    # use 'old_sound_rabbit_mq.task_producer' service to send data.
+    user_register:
+      connection:       default
+      exchange_options: { name: 'user_register', type: direct }
+      service_alias: user_register_producer
+    user_register_success:
+      connection:       default
+      exchange_options: { name: 'user_register_success', type: direct }
+      service_alias: user_register_success_producer
+    user_register_failure:
+      connection:       default
+      exchange_options: { name: 'user_register_failure', type: direct }
+      service_alias: user_register_failure_producer
+
+  consumers:
+    user_register:
+      connection:       default
+      exchange_options: { name: 'user_register', type: direct }
+      queue_options:    { name: 'user_register'}
+      callback:         App\PortAdapter\Consumers\RegisterUserConsumer
+    user_register_success:
+      connection:       default
+      exchange_options: { name: 'user_register_success', type: direct }
+      queue_options:    { name: 'user_register_success'}
+      callback:         App\PortAdapter\Consumers\SuccessfulRegisterUserConsumer
+    user_register_failure:
+      connection:       default
+      exchange_options: { name: 'user_register_failure', type: direct }
+      queue_options:    { name: 'user_register_failure'}
+      callback:         App\PortAdapter\Consumers\FailedRegisterUserConsumer
+

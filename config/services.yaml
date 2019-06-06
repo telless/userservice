@@ -1,0 +1,47 @@
+services:
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+  App\Application\:
+    resource: '../src/Application/*'
+    exclude: '../src/Application/Common/*Exception.php'
+  App\Domain\:
+    resource: '../src/Domain/*'
+  App\Infrastructure\:
+    resource: '../src/Infrastructure'
+  App\PortAdapter\:
+    resource: '../src/PortAdapter/*'
+    exclude: '../src/PortAdapter/{HTTP, Console}'
+
+  # End-point ports
+  App\PortAdapter\HTTP\:
+    resource: '../src/PortAdapter/HTTP'
+    tags: ['controller.service_arguments']
+  App\PortAdapter\Console\:
+    resource: '../src/PortAdapter/Console'
+    tags: ['console.command']
+
+  # Logger
+  App\Infrastructure\Common\Logger:
+    arguments:
+      $throwExceptions: false
+
+  # Kernel listeners
+  App\PortAdapter\Listener\FatalExceptionListener:
+    tags: [{ name: kernel.event_listener, event: kernel.exception }]
+
+  # Interface aliases
+  App\Domain\Common\DomainSession: '@App\PortAdapter\Common\Persistence\Doctrine\DoctrineDomainSession'
+  App\Domain\User\ReadModel\UserQueryService: '@App\PortAdapter\User\ReadModel\DoctrineUserQueryService'
+  App\Domain\User\PersistModel\UserRepository: '@App\PortAdapter\User\PersistModel\DoctrineUserRepository'
+  App\Infrastructure\User\DelayedUserProcess: '@App\PortAdapter\User\Infrastructure\RabbitMqDelayedUserProcess'
+
+  App\PortAdapter\User\Infrastructure\RabbitMqDelayedUserProcess:
+    arguments:
+      $registrationProducer: '@old_sound_rabbit_mq.user_register_producer'
+      $registrationErrorProducer: '@old_sound_rabbit_mq.user_register_failure_producer'
+      $registrationSuccessProducer: '@old_sound_rabbit_mq.user_register_success_producer'
+
+  # Vendor classes
+  Ramsey\Uuid\UuidFactory: ~

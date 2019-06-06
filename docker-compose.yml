@@ -1,0 +1,89 @@
+version: '3.1'
+
+services:
+  nginx:
+    image: nginx:1.11-alpine
+    container_name: nginx.local
+    ports:
+      - "8080:80"
+    volumes:
+      - ./artifact/dev/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./var/log/nginx:/var/log/nginx
+      - .:/app
+    depends_on:
+      - php
+    links:
+      - php:php.local
+
+  php:
+    image: crunchgeek/php-fpm:7.2
+    container_name: php.local
+    volumes:
+      - .:/app
+      - ./artifact/dev/php.conf:/usr/local/etc/php-fpm.d/www.conf
+    depends_on:
+      - postgres
+      - rmq
+    links:
+      - postgres:postgres.local
+      - rmq:rmq.local
+
+  register_worker:
+    image: crunchgeek/php-fpm:7.2
+    container_name: register_worker.local
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+      - rmq
+    links:
+      - postgres:postgres.local
+      - rmq:rmq.local
+    command: ['/app/bin/console', 'rabbitmq:consumer', 'user_register']
+
+  successful_register_worker:
+    image: crunchgeek/php-fpm:7.2
+    container_name: successful_register_worker.local
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+      - rmq
+    links:
+      - postgres:postgres.local
+      - rmq:rmq.local
+    command: ['/app/bin/console', 'rabbitmq:consumer', 'user_register_success']
+
+  failed_register_worker:
+    image: crunchgeek/php-fpm:7.2
+    container_name: failed_register_worker.local
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+      - rmq
+    links:
+      - postgres:postgres.local
+      - rmq:rmq.local
+    command: ['/app/bin/console', 'rabbitmq:consumer', 'user_register_failure']
+
+  postgres:
+    image: postgres:10.8
+    restart: on-failure
+    container_name: postgres.local
+    environment:
+      POSTGRES_DATABASE: "userservice"
+      POSTGRES_USER: "userservice"
+      POSTGRES_PASSWORD: "example"
+
+
+  rmq:
+    image: rabbitmq:3-management
+    container_name: rmq.local
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "SOMERANDOMPHRASE"
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+      - "15672:15672"
