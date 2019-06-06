@@ -7,14 +7,14 @@
 * Psalm
 * Консьюмеры иногда падают на старте, т.к. запускаются раньше rmq, разобраться.
 
-
-Запуск проекта - `make start`
-Перезапуск консьюмеров - `make restart-workers`
-Логи контейнера - `make s=%cont_name% logs`
-Логи приложения (dev.log стандартный) - `make project-logs`
-Пересоздание базы - `make db`
-Остальные команды - `make help`
+# Makefile
+* Запуск проекта - `make start`
+* Перезапуск консьюмеров - `make restart-workers`
+* Логи контейнера - `make s=%cont_name% logs`
+* Логи приложения (dev.log стандартный) - `make project-logs`
+* Пересоздание базы - `make db`
+* Остальные команды - `make help`
 
 # API
-Создание пользователя - `/user/register/ - POST (application/x-www-form-urlencoded), login + password`
-Список пользователей - `/user/ - GET`
+* Создание пользователя - `/user/register/ - POST (application/x-www-form-urlencoded), login + password`
+* Список пользователей - `/user/ - GET`
