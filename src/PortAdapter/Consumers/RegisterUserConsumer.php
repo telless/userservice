@@ -18,16 +18,18 @@ class RegisterUserConsumer implements ConsumerInterface
         $this->delayedUserProcess = $delayedUserProcess;
     }
 
-    public function execute(AMQPMessage $msg)
+    public function execute(AMQPMessage $msg): int
     {
         $data = json_decode($msg->getBody(), true);
-        var_dump($data);
-        var_dump($msg->getBody());
         $response = $this->userService->register($data['login'], $data['password']);
         if ($response->isSuccess()) {
             $this->delayedUserProcess->delayUserRegistrationSuccess($data['login'], $data['password']);
         } else {
-            $this->delayedUserProcess->delayUserRegistrationError($data['login'], $data['password'], $response->errors());
+            $this->delayedUserProcess->delayUserRegistrationError(
+                $data['login'],
+                $data['password'],
+                $response->errors()
+            );
         }
 
         return ConsumerInterface::MSG_ACK;

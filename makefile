@@ -48,6 +48,10 @@ logs: ## look for 's' service logs, make s=php logs
 project-logs: ## look for 's' service logs, make s=php logs
 		docker-compose exec php tail /app/var/log/dev.log
 
+.PHONY: psalm
+psalm: ## run psalm in php container
+		docker-compose exec php ./vendor/bin/psalm --show-info=false
+
 .PHONY: help
 help: ## Display this help message
 	@cat $(MAKEFILE_LIST) | grep -e "^[a-zA-Z_\-]*: *.*## *" | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
