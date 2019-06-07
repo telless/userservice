@@ -20,7 +20,10 @@ class PasswordEncoder
 
     public function encode(string $password): string
     {
-        return password_hash($password, PASSWORD_BCRYPT, ['cost' => $this->cost]);
+        /** @var string $hash */
+        $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => $this->cost]);
+
+        return $hash;
     }
 
     public function verify($hash, $password): bool
