@@ -13,6 +13,8 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class UserController
 {
+    private const DEFAULT_LIMIT = 10;
+
     private $userService;
     private $delayedUserService;
 
@@ -44,7 +46,7 @@ class UserController
      */
     public function listUsers(Request $request)
     {
-        $limit = $request->get('limit', 10);
+        $limit = $request->get('limit', self::DEFAULT_LIMIT);
         $userList = $this->userService->list($limit)->data();
 
         return new JsonResponse(['userList' => $userList], JsonResponse::HTTP_OK);
