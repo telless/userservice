@@ -42,12 +42,13 @@ class UserService
                 $password,
                 $this->passwordEncoder
             );
-            $this->userRepository->store($user);
 
+            $this->userRepository->store($user);
             $this->domainSession->flush();
-            $this->domainSession->close();
         } catch (\DomainException $exception) {
             return ApplicationResponse::generateErrorResponse([$exception->getMessage()]);
+        } finally {
+            $this->domainSession->close();
         }
 
         return ApplicationResponse::generateSuccessResponse($uuid);
