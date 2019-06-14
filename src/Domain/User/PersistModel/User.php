@@ -2,7 +2,6 @@
 
 namespace App\Domain\User\PersistModel;
 
-use App\Domain\User\Authentication\PasswordEncoder;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -28,28 +27,27 @@ class User
     private $registeredAt;
 
 
-    private function __construct(string $uuid, string $login, string $password, PasswordEncoder $encoder)
+    private function __construct(string $uuid, string $login, string $password)
     {
         $this->uuid = $uuid;
         $this->registeredAt = new \DateTimeImmutable();
-        $this->credentials = new Credentials($login, $password, $encoder);
+        $this->credentials = new Credentials($login, $password);
     }
 
     public static function register(
         string $uuid,
         string $login,
-        string $password,
-        PasswordEncoder $passwordEncoder
+        string $password
     ): self {
         if (mb_strlen($password) < 6) {
             throw new \DomainException('Password must contain 6+ symbols');
         }
 
-        return new self($uuid, $login, $password, $passwordEncoder);
+        return new self($uuid, $login, $password);
     }
 
-    public function changePassword(string $oldPassword, string $newPassword, PasswordEncoder $encoder)
+    public function changePassword(string $oldPassword, string $newPassword)
     {
-        $this->credentials->changePassword($oldPassword, $newPassword, $encoder);
+        $this->credentials->changePassword($oldPassword, $newPassword);
     }
 }

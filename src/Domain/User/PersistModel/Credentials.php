@@ -2,7 +2,6 @@
 
 namespace App\Domain\User\PersistModel;
 
-use App\Domain\User\Authentication\PasswordEncoder;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -10,6 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Credentials
 {
+    private const DEFAULT_PASSWORD_COST = 13;
+
     /**
      * @ORM\Column(type="string", length=50)
      */
@@ -20,16 +21,21 @@ class Credentials
      */
     private $encodedPassword;
 
-    public function __construct(string $login, string $password, PasswordEncoder $encoder)
+    public function __construct(string $login, string $password)
     {
         $this->login = $login;
-        $this->encodedPassword = $encoder->encode($password);
+        $this->encodedPassword = $this->encodePassword($password);
     }
 
-    public function changePassword(string $oldPassword, string $newPassword, PasswordEncoder $encoder): bool
+    public function authenticate(string $password): bool
     {
-        if ($this->validatePassword($oldPassword, $encoder)) {
-            $this->encodedPassword = $encoder->encode($newPassword);
+        return $this->verifyPassword($password);
+    }
+
+    public function changePassword(string $oldPassword, string $newPassword): bool
+    {
+        if ($this->verifyPassword($oldPassword)) {
+            $this->encodedPassword = $this->encodePassword($newPassword);
 
             return true;
         }
@@ -37,8 +43,16 @@ class Credentials
         return false;
     }
 
-    private function validatePassword(string $password, PasswordEncoder $encoder): bool
+    private function encodePassword(string $password): string
     {
-        return $encoder->verify($this->encodedPassword, $password);
+        /** @var string $hash */
+        $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => self::DEFAULT_PASSWORD_COST]);
+
+        return $hash;
+    }
+
+    private function verifyPassword(string $password): bool
+    {
+        return password_verify($password, $this->encodedPassword);
     }
 }
