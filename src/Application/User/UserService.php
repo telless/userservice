@@ -2,6 +2,7 @@
 
 namespace App\Application\User;
 
+use App\Application\Common\Action;
 use App\Application\Common\ApplicationResponse;
 use App\Domain\Common\DomainSession;
 use App\Domain\User\PersistModel\User;
@@ -15,17 +16,20 @@ class UserService
     private $userQueryService;
     private $uuidGenerator;
     private $domainSession;
+    private $action;
 
     public function __construct(
         UserRepository $userRepository,
         UserQueryService $userQueryService,
         UuidGenerator $uuidGenerator,
-        DomainSession $domainSession
+        DomainSession $domainSession,
+        Action $action
     ) {
         $this->userRepository = $userRepository;
         $this->userQueryService = $userQueryService;
         $this->uuidGenerator = $uuidGenerator;
         $this->domainSession = $domainSession;
+        $this->action = $action;
     }
 
     public function register(string $login, string $password): ApplicationResponse

@@ -45,3 +45,25 @@ services:
 
   # Vendor classes
   Ramsey\Uuid\UuidFactory: ~
+
+  common_action:
+    class: 'App\Application\Common\CommonAction'
+
+  loggable_action:
+    class: 'App\Application\Common\LoggableAction'
+    arguments:
+      $action: '@common_action'
+
+  restricted_action:
+    class: 'App\Application\Common\RestrictedAction'
+    arguments:
+      $action: '@common_action'
+
+  loggable_restricted_action:
+    class: 'App\Application\Common\LoggableAction'
+    arguments:
+      $action: '@restricted_action'
+
+  App\Application\User\UserService:
+    arguments:
+      $action: '@loggable_restricted_action'
